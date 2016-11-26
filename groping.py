@@ -111,6 +111,9 @@ def protocol_50(group, c2, players):
 
 def protocol_51(group, n, m, i, ps, xs, sigma_c, sigma_d, tau):
     taun = reduce(lambda acc, _: compose(tau, acc), range(i), tau)
+
+    #print("%s, %s" % (i, taun))
+
     taun_sigma_d = permute(taun, sigma_d)
 
     r_sigma_c, r_taun_sigma_d = protocol_47a(group, n, m, sigma_c, ps), protocol_47a(group, n, m, taun_sigma_d, ps)
@@ -162,7 +165,8 @@ if __name__ == "__main__":
     # the number of players
     p = n - m
 
-    tau = [1, 4, 5, 6, 0, 2, 3]
+    tau = [4, 0, 5, 6, 1, 2, 3]
+    #tau = [1, 4, 5, 6, 0, 2, 3]
     #tau = [1, 2, 5, 4, 6, 0, 3]
     #tau = [6, 0, 7, 2, 8, 4, 1, 3, 5]
 
@@ -185,8 +189,8 @@ if __name__ == "__main__":
     sigma_c1, sigma_d1 = protocol_47b(group, n, m, c01, ps), protocol_47b(group, n, m, d01, ps)
     c2, d2 = protocol_50(group, c02, ps), protocol_50(group, d02, ps)
     
-    ds = [protocol_51(group, n, m, i, ps, x1 + x2, sigma_c1 + c2, sigma_d1 + d2, tau) for i in range(r + 1)]
-
+    ds = [protocol_51(group, n, m, i, ps, x1 + x2, sigma_c1 + c2, sigma_d1 + d2, tau) for i in range(r)]
+    
     for d in ds:
         cs = [draw(group, d, y1 + y2, i, ps) for i in range(n)]
         print(cs)
