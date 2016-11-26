@@ -35,6 +35,12 @@ def inverse(pi):
 def mask(s):
     return [random.choice([True, False]) for _ in range(s)]
 
+def transform(pi):
+    return [p for (_, p) in sorted(zip(pi, range(len(pi))))]
+
+def minus1(pi):
+    return [p - 1 for p in pi]
+
 # class
 
 class Player:
@@ -63,12 +69,12 @@ def procedure_33(n, m, ca, cb, r, pi):
     return all( f(i) for i in range(n - m) )
 
 def procedure_34(group, deck):
-    r = [ random_number(group) for _ in range(len(deck)) ]
-    c = [(x[0][0] ** x[1], x[0][1] ** x[1]) for x in zip(deck, r)]
-    return (c, r)
+    rs = [random_number(group) for _ in range(len(deck))]
+    c = [(x[0] ** r, x[1] ** r) for (x, r) in zip(deck, rs)]
+    return (c, rs)
             
 def protocol_48(group, n, m, p, ci_1, ci, pi, r, s):
-    c = [ procedure_32(group, ci, p) for _ in range(s) ]
+    c = [procedure_32(group, ci, p) for _ in range(s)]
     u = mask(s)
     def f(i):
         c_ik, r_ik, pi_ik = c[i]
@@ -76,10 +82,10 @@ def protocol_48(group, n, m, p, ci_1, ci, pi, r, s):
             return procedure_33(n, m, ci, c_ik, r_ik, pi_ik)
         else:
             pi_ = compose(pi_ik, pi)
-            r_  = permute( inverse(pi_), [ r[pi_[j]] * r_ik[pi_ik[j]] for j in range(len(pi_)) ] )
+            r_  = permute(inverse(pi_), [r[pi_[j]] * r_ik[pi_ik[j]] for j in range(len(pi_))])
             return procedure_33(n, m, ci_1, c_ik, r_, pi_)
 
-    return all( f(i) for i in range(s) )
+    return all([f(i) for i in range(s)])
     
 
 def cp_proof(alpha, beta, er, er_1, c, r, a, b):
@@ -111,9 +117,6 @@ def protocol_50(group, c2, players):
 
 def protocol_51(group, n, m, i, ps, xs, sigma_c, sigma_d, tau):
     taun = reduce(lambda acc, _: compose(tau, acc), range(i), tau)
-
-    #print("%s, %s" % (i, taun))
-
     taun_sigma_d = permute(taun, sigma_d)
 
     r_sigma_c, r_taun_sigma_d = protocol_47a(group, n, m, sigma_c, ps), protocol_47a(group, n, m, taun_sigma_d, ps)
@@ -165,7 +168,7 @@ if __name__ == "__main__":
     # the number of players
     p = n - m
 
-    tau = [4, 0, 5, 6, 1, 2, 3]
+    tau = transform(minus1([2, 5, 6, 7, 1, 3, 4]))
     #tau = [1, 4, 5, 6, 0, 2, 3]
     #tau = [1, 2, 5, 4, 6, 0, 3]
     #tau = [6, 0, 7, 2, 8, 4, 1, 3, 5]
@@ -175,16 +178,13 @@ if __name__ == "__main__":
 
     # public key
     alpha = random_point(group)
+    # use dh key exchange
     beta = reduce(lambda x, y: x ** y.key, ps, alpha)
 
-    x1 = [random_number(group) for _ in range(p)]
-    x2 = [random_number(group) for _ in range(m)]
-    y1 = [random_number(group) for _ in range(p)]
-    y2 = [random_number(group) for _ in range(m)]
-    c01 = [(alpha ** x1[i], beta) for i in range(p)]
-    c02 = [(alpha ** x2[i], beta) for i in range(m)]
-    d01 = [(alpha ** y1[i], beta) for i in range(p)]
-    d02 = [(alpha ** y2[i], beta) for i in range(m)]
+    x1, x2 = [random_number(group) for _ in range(p)], [random_number(group) for _ in range(m)]
+    y1, y2 = [random_number(group) for _ in range(p)], [random_number(group) for _ in range(m)]
+    c01, c02 = [(alpha ** x1[i], beta) for i in range(p)], [(alpha ** x2[i], beta) for i in range(m)]
+    d01, d02 = [(alpha ** y1[i], beta) for i in range(p)], [(alpha ** y2[i], beta) for i in range(m)]
 
     sigma_c1, sigma_d1 = protocol_47b(group, n, m, c01, ps), protocol_47b(group, n, m, d01, ps)
     c2, d2 = protocol_50(group, c02, ps), protocol_50(group, d02, ps)
